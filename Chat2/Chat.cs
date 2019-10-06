@@ -13,14 +13,13 @@ namespace Chat2
 {
     public partial class Form1 : Form
     {
-
         public delegate void UpdateText(String texto);
-        String[] cargando = new String[4];
         String miNombre;
+        public Thread t1, t2, t3, t4;
 
-        Thread t1, t2, t3, t4;
         public bool conectado = false;
         public bool server = false;
+        public static String ipLocal, puerto;
 
         public Form1()
         {
@@ -29,11 +28,13 @@ namespace Chat2
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            ChatSocket.GetPanel(panel1);
-            ChatSocket.GetTextBox(textBox3);
-            panel2.BringToFront();
-            panel1.BringToFront();
-            panel3.BringToFront();
+            server = false;
+            ChatSocket.panelConection = this.panel_Connection;
+            ChatSocket.txtbox = this.txt_HistorialMensajes;
+            panel_Chat.BringToFront();
+            panel_Connection.BringToFront();
+            panel_Inicio.BringToFront();
+
             try
             {
                 miNombre = System.IO.File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\AppData\Local\Temp\SimpleChatName.txt");
@@ -42,106 +43,178 @@ namespace Chat2
             {
 
             }
-            textBox5.Text = miNombre;
+            txt_Nombre.Text = miNombre;
 
-            //if (System.Windows.Forms.Application.MessageLoop)
-            //{
-            //    // WinForms app
-            //    System.Windows.Forms.Application.Exit();
-            //}
-            //else
-            //{
-            //    // Console app
-            //    System.Environment.Exit(1);
-            //}
         }
 
         private void ThreadStart()
         {
-            ChatSocket.StartServer(miNombre);
+            ChatSocket.StartServer(miNombre, txt_DireccionIpLocal.Text, txt_PuertoLocal.Text);
             conectado = true;
             server = true;
             t1 = new Thread(ChatSocket.RecieveMessage);
             t1.Start();
         }
 
-        private void ThreadRecieve()
-        {
-            ChatSocket.RecieveMessage();
-        }
-
         private void UpdateLabel(String message)
         {
-            label1.Text = message;
+            lbl_ServerState.Text = message;
         }
-
-
-
-        private void Cargando()
-        {
-            int i = 0;
-            while (conectado == false)
-            {
-                label1.Invoke(new UpdateText(this.UpdateLabel), cargando[i++]);
-                if (i == 4)
-                {
-                    i = 0;
-                }
-                Thread.Sleep(500);
-            }
-        }
-
-
 
         private void IniciarServer(object sender, EventArgs e)
         {
-            if (checkBox2.Checked == true)
+            if (check_IniciarServer.Checked == true)
             {
-                label1.Visible = true;
-                cargando[0] = "Esperando conexiones";
-                cargando[1] = "Esperando conexiones.";
-                cargando[2] = "Esperando conexiones..";
-                cargando[3] = "Esperando conexiones...";
-
-                t4 = new Thread(Cargando);
-                t4.Start();
-
                 t1 = new Thread(ThreadStart);
                 t1.Start();
 
-                
-
+                Thread.Sleep(100);
+                lbl_ServerState.ForeColor = Color.Green;
+                lbl_CircleServerState.ForeColor = Color.Green;
+                lbl_ServerState.Text = "Servidor encendido";
+                txt_DireccionIpLocal.ReadOnly = true;
+                txt_PuertoLocal.ReadOnly = true;
+                server = true;
             }
+            else
+            {
+                //Apagar server
+            }
+        }
+
+        private void StartClient()
+        {
+            if (txt_DireccionIpRemota.Text == "")
+            {
+                txt_DireccionIpRemota.Text = "localhost";
+            }
+            ChatSocket.StartClient(miNombre, txt_DireccionIpRemota.Text, txt_PuertoRemoto.Text);
+            server = false;
+            t3 = new Thread(ChatSocket.ClientRecieveMessage);
+            t3.Start();
         }
 
         private void IniciarCliente(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)13)
             {
-                if (textBox2.Text == "")
-                {
-                    textBox2.Text = "localhost";
-                }
-                ChatSocket.StartClient(miNombre, textBox2.Text);
-                server = false;
-                t3 = new Thread(ChatSocket.ClientRecieveMessage);
-                t3.Start();
+                StartClient();
             }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Application.Exit();
+            t1.Abort();
+            t2.Abort();
+            t3.Abort();
+            t4.Abort();
+            ChatSocket.t3.Abort();
+            ChatSocket.t4.Abort();
+        }
+
+        private void TextBox1_Enter(object sender, EventArgs e)
+        {
+            txt_EscribirMensaje.ForeColor = Color.Black;
+            txt_EscribirMensaje.Text = "";
+        }
+
+        private void TextBox1_Leave(object sender, EventArgs e)
+        {
+            txt_EscribirMensaje.ForeColor = Color.DarkGray;
+            txt_EscribirMensaje.Text = "Escribe tu mensaje...";
+        }
+
+        private void TextBox6_MouseEnter(object sender, EventArgs e)
+        {
+            toolTip1.Active = true;
+            toolTip1.ToolTipIcon = ToolTipIcon.Info;
+            toolTip1.IsBalloon = false;
+            toolTip1.Show("Ingresa una IP propia", this, 20,145);
+        }
+
+        private void TextBox6_MouseLeave(object sender, EventArgs e)
+        {
+            toolTip1.Active = false;
+        }
+
+        private void TextBox7_Enter(object sender, EventArgs e)
+        {
+            if (!server)
+            {
+                txt_PuertoLocal.Text = "";
+            }
+            txt_PuertoLocal.ForeColor = Color.Black;
+        }
+
+        private void Txt_Puerto_Leave(object sender, EventArgs e)
+        {
+            if (txt_PuertoLocal.Text == "")
+            {
+                txt_PuertoLocal.Text = "11000";
+                txt_PuertoLocal.ForeColor = Color.DarkGray;
+            }
+        }
+
+        private void Txt_DireccionIpLocal_Enter(object sender, EventArgs e)
+        {
+            if (!server)
+            {
+                txt_DireccionIpLocal.Text = "";
+            }
+            txt_DireccionIpLocal.ForeColor = Color.Black;
+        }
+
+        private void Txt_DireccionIpLocal_Leave(object sender, EventArgs e)
+        {
+            if (txt_DireccionIpLocal.Text == "")
+            {
+                txt_DireccionIpLocal.Text = ipLocal;
+                txt_DireccionIpLocal.ForeColor = Color.DarkGray;
+            }
+        }
+
+        private void Txt_PuertoRemoto_Enter(object sender, EventArgs e)
+        {
+            if (txt_PuertoRemoto.Text != "")
+            {
+                txt_PuertoRemoto.Text = "";
+                txt_PuertoRemoto.ForeColor = Color.Black;
+            }
+        }
+
+        private void Txt_PuertoRemoto_Leave(object sender, EventArgs e)
+        {
+            if (txt_PuertoRemoto.Text == "")
+            {
+                txt_PuertoRemoto.Text = "11000";
+                txt_PuertoRemoto.ForeColor = Color.DarkGray;
+            }
+        }
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void IniciarCliente(object sender, EventArgs e)
+        {
+            StartClient();
+        }
+
+        private void Label1_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void EnterMensaje(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)13)
             {
-                SendMessage(textBox1.Text.Trim());
-                textBox1.Text = null;
-                textBox1.Multiline = false;
-                textBox1.Multiline = true;
+                SendMessage(txt_EscribirMensaje.Text.Trim());
+                txt_EscribirMensaje.Text = null;
+                txt_EscribirMensaje.Multiline = false;
+                txt_EscribirMensaje.Multiline = true;
                 //MessageBox.Show(textBox1.SelectionStart.ToString());
             }
         }
@@ -157,7 +230,7 @@ namespace Chat2
                 {
                     t2 = new Thread(ChatSocket.ServerSendMessage);
                     t2.Start();
-                    ChatSocket.GetString(message);
+                    ChatSocket.data = message;
                 }
                 else
                 {
@@ -171,20 +244,19 @@ namespace Chat2
 
         private void IngresarNombre(object sender, KeyPressEventArgs e)
         {
-            if (textBox5.Text != "")
+            if (txt_Nombre.Text != "")
             {
                 if (e.KeyChar == (char)13)
                 {
-                    miNombre = textBox5.Text;
+                    miNombre = txt_Nombre.Text;
                     System.IO.File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\AppData\Local\Temp\SimpleChatName.txt", miNombre);
-                    panel3.Visible = false;
-                    //notifyIcon1.Visible = true;
-                    //notifyIcon1.BalloonTipTitle = "Has recibido un mensaje";
-                    //notifyIcon1.BalloonTipText = "Da clic para verlo";
-                    //notifyIcon1.ShowBalloonTip(1000);
+                    panel_Inicio.Visible = false;
+                    ChatSocket.SetupServer();
+                    txt_DireccionIpLocal.Text = ipLocal;
+                    txt_PuertoLocal.Text = "11000";
                 }
             }
         }
-
     }
 }
+

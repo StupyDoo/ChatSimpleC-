@@ -18,10 +18,10 @@ namespace Chat2
         public static String myName;
         public static String userName;
 
-        static Panel panelConection;
-        static TextBox txtbox;
+        public static Panel panelConection;
+        public static TextBox txtbox;
 
-        static Thread t3, t4;
+        public static Thread t3, t4;
         public static string data = null;
 
         static byte[] bytesSv = new Byte[1024];
@@ -37,23 +37,6 @@ namespace Chat2
         static IPAddress ipAddressCl;
         static IPEndPoint remoteEP;
         static Socket sender;
-
-
-        public static void GetTextBox(TextBox t)
-        {
-            txtbox = t;
-        }
-
-        public static void GetPanel(Panel p)
-        {
-            panelConection = p;
-        }
-
-        public static void GetString(String s)
-        {
-            data = null;
-            data = s;
-        }
 
         static public void AddMessage1(String message, String user)
         {
@@ -82,17 +65,21 @@ namespace Chat2
             MessageBox.Show("Conexión establecida con " + userName);
         }
 
-        public static void StartServer(String serverName)
+        public static void SetupServer()
         {
-            myName = serverName;
             ipHostInfoSv = Dns.GetHostEntry(Dns.GetHostName());
             ipAddressSv = ipHostInfoSv.AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
-            ipAddressSv = IPAddress.Parse("25.26.207.181");
-            t3 = new Thread(MsgBox);
-            t3.Start();
-            //MessageBox.Show("Servidor iniciado en: " + ipAddressSv.ToString(), "Dirección IP local");
-            localEndPoint = new IPEndPoint(ipAddressSv, 11000);
+            Form1.ipLocal = ipHostInfoSv.AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork).ToString();
+        }
 
+        public static void StartServer(String serverName, String ip, String puerto)
+        {
+            myName = serverName;
+            ipAddressSv = IPAddress.Parse(ip);
+            int port = Convert.ToInt32(puerto);
+            localEndPoint = new IPEndPoint(ipAddressSv, port);
+            Form1.puerto = port.ToString();
+            Form1.ipLocal = ipAddressSv.ToString();
             listener = new Socket(ipAddressSv.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             Console.WriteLine("Server iniciado en: " + localEndPoint.ToString());
             listener.Bind(localEndPoint);
@@ -120,12 +107,7 @@ namespace Chat2
 
         }
 
-        private static void MsgBox()
-        {
-            MessageBox.Show("Servidor iniciado en: " + ipAddressSv.ToString(), "Dirección IP local");
-        }
-
-        public static void StartClient(String clientName, String ip)
+        public static void StartClient(String clientName, String ip, String puerto)
         {
             try
             {
@@ -133,7 +115,8 @@ namespace Chat2
                 ipHostInfoCl = Dns.GetHostEntry(Dns.GetHostName());
                 //ipAddressCl = ipHostInfoCl.AddressList[5];
                 ipAddressCl = IPAddress.Parse(ip);
-                remoteEP = new IPEndPoint(ipAddressCl, 11000);
+                int port = Convert.ToInt32(puerto);
+                remoteEP = new IPEndPoint(ipAddressCl, port);
 
                 sender = new Socket(ipAddressCl.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
