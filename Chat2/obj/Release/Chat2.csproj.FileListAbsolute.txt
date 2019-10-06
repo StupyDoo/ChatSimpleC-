@@ -1,0 +1,12 @@
+C:\Users\Julio\source\repos\Chat2\Chat2\obj\Release\Chat2.Form1.resources
+C:\Users\Julio\source\repos\Chat2\Chat2\obj\Release\Chat2.csproj.GenerateResource.cache
+C:\Users\Julio\source\repos\Chat2\Chat2\obj\Release\Chat2.csproj.CoreCompileInputs.cache
+C:\Users\Julio\source\repos\Chat2\Chat2\bin\Release\LoadingIndicator.WinForms.dll
+C:\Users\Julio\source\repos\Chat2\Chat2\obj\Release\Chat2.csproj.CopyComplete
+C:\Users\Julio\source\repos\Chat2\Chat2\bin\Release\Chat2.exe.config
+C:\Users\Julio\source\repos\Chat2\Chat2\bin\Release\Chat2.exe
+C:\Users\Julio\source\repos\Chat2\Chat2\bin\Release\Chat2.pdb
+C:\Users\Julio\source\repos\Chat2\Chat2\obj\Release\Chat2.Properties.Resources.resources
+C:\Users\Julio\source\repos\Chat2\Chat2\obj\Release\Chat2.exe
+C:\Users\Julio\source\repos\Chat2\Chat2\obj\Release\Chat2.pdb
+C:\Users\Julio\source\repos\Chat2\Chat2\obj\Release\Chat2.csprojAssemblyReference.cache
